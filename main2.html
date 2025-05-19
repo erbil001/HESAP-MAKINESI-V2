@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilimsel Hesap Makinesi</title>
+    <!-- Math.js ve Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Light Mode */
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --text: #2b2d42;
+            --bg: #f8f9fa;
+            --card: rgba(255, 255, 255, 0.9);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            
+            /* Gradient Colors */
+            --bg-color-1: #ee7752;
+            --bg-color-2: #e73c7e;
+            --bg-color-3: #23a6d5;
+            --bg-color-4: #23d5ab;
+        }
+
+        .dark-mode {
+            /* Dark Mode */
+            --primary: #4895ef;
+            --secondary: #4cc9f0;
+            --accent: #7209b7;
+            --text: #f8f9fa;
+            --bg: #121212;
+            --card: rgba(30, 30, 30, 0.9);
+            --shadow: rgba(0, 0, 0, 0.3);
+            
+            /* Dark Gradient */
+            --bg-color-1: #2b5876;
+            --bg-color-2: #4e4376;
+            --bg-color-3: #1f1c2c;
+            --bg-color-4: #1f1c2c;
+        }
+
+        /* Hareketli Gradient Arka Plan */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(-45deg, 
+                var(--bg-color-1), 
+                var(--bg-color-2), 
+                var(--bg-color-3), 
+                var(--bg-color-4));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Genel Stiller */
+        * {
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tab Stilleri */
+        .tab-container {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: var(--card);
+            color: var(--primary);
+        }
+
+        /* Hesap Makinesi Stilleri */
+        .calculator {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border-radius: 0 15px 15px 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .calculator-display {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: right;
+            font-size: 1.8rem;
+            min-height: 80px;
+            word-wrap: break-word;
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.8rem;
+        }
+
+        .calc-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .calc-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .calc-btn.operator {
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: bold;
+        }
+
+        .calc-btn.function {
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+        }
+
+        .calc-btn.equals {
+            background: var(--accent);
+            color: white;
+            grid-column: span 2;
+        }
+
+        /* Geometri Hesaplayıcı */
+        .geometry-calculator {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px var(--shadow);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .geometry-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .geometry-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .geometry-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .geometry-form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        .geometry-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Kontrol Paneli */
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px var(--shadow);
+            z-index: 100;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg);
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .dark-mode .toggle-switch::before {
+            transform: translateX(30px);
+        }
+
+        /* Responsive Tasarım */
+        @media (max-width: 768px) {
+            .calculator-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .geometry-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                bottom: 10px;
+                right: 10px;
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tab-container">
+            <button class="tab active" onclick="openTab('calculator')">Bilimsel Hesap Makinesi</button>
+            <button class="tab" onclick="openTab('geometry')">Geometri Hesaplamaları</button>
+        </div>
+
+        <!-- Bilimsel Hesap Makinesi -->
+        <div id="calculator" class="calculator">
+            <div class="calculator-display" id="display">0</div>
+            <div class="calculator-buttons">
+                <!-- Satır 1 -->
+                <button class="calc-btn" onclick="appendToDisplay('7')">7</button>
+                <button class="calc-btn" onclick="appendToDisplay('8')">8</button>
+                <button class="calc-btn" onclick="appendToDisplay('9')">9</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('(')">(</button>
+                <button class="calc-btn operator" onclick="appendToDisplay(')')">)</button>
+                
+                <!-- Satır 2 -->
+                <button class="calc-btn" onclick="appendToDisplay('4')">4</button>
+                <button class="calc-btn" onclick="appendToDisplay('5')">5</button>
+                <button class="calc-btn" onclick="appendToDisplay('6')">6</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('+')">+</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('-')">-</button>
+                
+                <!-- Satır 3 -->
+                <button class="calc-btn" onclick="appendToDisplay('1')">1</button>
+                <button class="calc-btn" onclick="appendToDisplay('2')">2</button>
+                <button class="calc-btn" onclick="appendToDisplay('3')">3</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('*')">×</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('/')">÷</button>
+                
+                <!-- Satır 4 -->
+                <button class="calc-btn" onclick="appendToDisplay('0')">0</button>
+                <button class="calc-btn" onclick="appendToDisplay('.')">.</button>
+                <button class="calc-btn operator" onclick="clearDisplay()">C</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('^')">^</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('sqrt(')">√</button>
+                
+                <!-- Satır 5 - Bilimsel Fonksiyonlar -->
+                <button class="calc-btn function" onclick="appendToDisplay('sin(')">sin</button>
+                <button class="calc-btn function" onclick="appendToDisplay('cos(')">cos</button>
+                <button class="calc-btn function" onclick="appendToDisplay('tan(')">tan</button>
+                <button class="calc-btn function" onclick="appendToDisplay('log(')">log</button>
+                <button class="calc-btn function" onclick="appendToDisplay('ln(')">ln</button>
+                
+                <!-- Satır 6 - Diğer Fonksiyonlar -->
+                <button class="calc-btn function" onclick="appendToDisplay('pi')">π</button>
+                <button class="calc-btn function" onclick="appendToDisplay('e')">e</button>
+                <button class="calc-btn function" onclick="appendToDisplay('factorial(')">n!</button>
+                <button class="calc-btn function" onclick="appendToDisplay('abs(')">|x|</button>
+                <button class="calc-btn function" onclick="appendToDisplay('round(')">round</button>
+                
+                <!-- Son Satır -->
+                <button class="calc-btn equals" onclick="calculate()" style="grid-column: span 5;">=</button>
+            </div>
+        </div>
+
+        <!-- Geometri Hesaplayıcı -->
+        <div id="geometry" class="geometry-calculator">
+            <h2>Geometrik Şekil Hesaplamaları</h2>
+            
+            <div class="geometry-form">
+                <!-- Daire Hesaplamaları -->
+                <div class="geometry-form-group">
+                    <h3>Daire</h3>
+                    <label for="circle-radius">Yarıçap (r):</label>
+                    <input type="number" id="circle-radius" placeholder="Yarıçap girin">
+                    <button class="calc-btn" onclick="calculateCircle()">Hesapla</button>
+                    <div class="geometry-result" id="circle-result"></div>
+                </div>
+                
+                <!-- Dikdörtgen Hesaplamaları -->
+                <div class="geometry-form-group">
+                    <h3>Dikdörtgen</h3>
+                    <label for="rectangle-length">Uzunluk:</label>
+                    <input type="number" id="rectangle-length" placeholder="Uzunluk girin">
+                    <label for="rectangle-width">Genişlik:</label>
+                    <input type="number" id="rectangle-width" placeholder="Genişlik girin">
+                    <button class="calc-btn" onclick="calculateRectangle()">Hesapla</button>
+                    <div class="geometry-result" id="rectangle-result"></div>
+                </div>
+                
+                <!-- Üçgen Hesaplamaları -->
+                <div class="geometry-form-group">
+                    <h3>Üçgen</h3>
+                    <label for="triangle-base">Taban:</label>
+                    <input type="number" id="triangle-base" placeholder="Taban girin">
+                    <label for="triangle-height">Yükseklik:</label>
+                    <input type="number" id="triangle-height" placeholder="Yükseklik girin">
+                    <button class="calc-btn" onclick="calculateTriangle()">Hesapla</button>
+                    <div class="geometry-result" id="triangle-result"></div>
+                </div>
+                
+                <!-- Küre Hesaplamaları -->
+                <div class="geometry-form-group">
+                    <h3>Küre</h3>
+                    <label for="sphere-radius">Yarıçap (r):</label>
+                    <input type="number" id="sphere-radius" placeholder="Yarıçap girin">
+                    <button class="calc-btn" onclick="calculateSphere()">Hesapla</button>
+                    <div class="geometry-result" id="sphere-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kontrol Paneli -->
+    <div class="control-panel">
+        <div class="toggle-container">
+            <div class="toggle-switch" id="toggle-switch"></div>
+            <span id="toggle-label">Karanlık Mod</span>
+        </div>
+    </div>
+
+    <script>
+        // Tab Geçişleri
+        function openTab(tabName) {
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
+            
+            document.getElementById('calculator').style.display = 'none';
+            document.getElementById('geometry').style.display = 'none';
+            document.getElementById(tabName).style.display = 'block';
+        }
+
+        // Karanlık/Aydınlık Mod
+        const toggleSwitch = document.getElementById('toggle-switch');
+        const toggleLabel = document.getElementById('toggle-label');
+        
+        toggleSwitch.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            toggleLabel.textContent = document.body.classList.contains('dark-mode') ? 'Aydınlık Mod' : 'Karanlık Mod';
+        });
+
+        // Hesap Makinesi Fonksiyonları
+        let currentDisplay = '0';
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = currentDisplay;
+        }
+
+        function appendToDisplay(value) {
+            if (currentDisplay === '0' && value !== '.') {
+                currentDisplay = value;
+            } else {
+                currentDisplay += value;
+            }
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentDisplay = '0';
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                let expression = currentDisplay
+                    .replace(/\^/g, '**')  // Üs alma
+                    .replace(/π/g, 'pi')    // Pi sayısı
+                    .replace(/e/g, 'e');    // Euler sayısı
+
+                const result = math.evaluate(expression);
+                currentDisplay = result.toString();
+                updateDisplay();
+            } catch (error) {
+                currentDisplay = 'Hata';
+                updateDisplay();
+                setTimeout(clearDisplay, 1500);
+            }
+        }
+
+        // Geometri Hesaplama Fonksiyonları
+        function calculateCircle() {
+            const radius = parseFloat(document.getElementById('circle-radius').value);
+            if (!radius) {
+                alert('Lütfen yarıçap değeri girin!');
+                return;
+            }
+            
+            const area = math.round(math.pi * math.pow(radius, 2), 4);
+            const circumference = math.round(2 * math.pi * radius, 4);
+            
+            document.getElementById('circle-result').innerHTML = `
+                Alan: ${area} birim²<br>
+                Çevre: ${circumference} birim
+            `;
+        }
+
+        function calculateRectangle() {
+            const length = parseFloat(document.getElementById('rectangle-length').value);
+            const width = parseFloat(document.getElementById('rectangle-width').value);
+            
+            if (!length || !width) {
+                alert('Lütfen tüm değerleri girin!');
+                return;
+            }
+            
+            const area = math.round(length * width, 4);
+            const perimeter = math.round(2 * (length + width), 4);
+            
+            document.getElementById('rectangle-result').innerHTML = `
+                Alan: ${area} birim²<br>
+                Çevre: ${perimeter} birim
+            `;
+        }
+
+        function calculateTriangle() {
+            const base = parseFloat(document.getElementById('triangle-base').value);
+            const height = parseFloat(document.getElementById('triangle-height').value);
+            
+            if (!base || !height) {
+                alert('Lütfen tüm değerleri girin!');
+                return;
+            }
+            
+            const area = math.round(0.5 * base * height, 4);
+            
+            document.getElementById('triangle-result').innerHTML = `
+                Alan: ${area} birim²
+            `;
+        }
+
+        function calculateSphere() {
+            const radius = parseFloat(document.getElementById('sphere-radius').value);
+            if (!radius) {
+                alert('Lütfen yarıçap değeri girin!');
+                return;
+            }
+            
+            const volume = math.round((4/3) * math.pi * math.pow(radius, 3), 4);
+            const surfaceArea = math.round(4 * math.pi * math.pow(radius, 2), 4);
+            
+            document.getElementById('sphere-result').innerHTML = `
+                Hacim: ${volume} birim³<br>
+                Yüzey Alanı: ${surfaceArea} birim²
+            `;
+        }
+
+        // Sayfa yüklendiğinde ilk tab'ı göster
+        window.onload = function() {
+            openTab('calculator');
+            updateDisplay();
+        };
+
+        // Fare hareketine tepki veren arka plan efekti
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            document.body.style.backgroundPosition = `${x * 100}% ${y * 100}%`;
+        });
+    </script>
+</body>
+</html>
